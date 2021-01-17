@@ -1,0 +1,13 @@
+FROM alpine:latest
+RUN apk add --no-cache curl \
+    wget \
+    runit
+WORKDIR /etc/sv/firstrunitservice
+COPY firstrunitservice .
+RUN chmod +x run
+RUN chmod +x log/run
+
+RUN ln -s /etc/sv/firstrunitservice /etc/service/firstrunitservice
+
+CMD runsvdir -P /etc/service
+RUN echo "done building"

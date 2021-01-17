@@ -1,0 +1,4 @@
+#!/bin/sh
+exec 2>&1
+echo "i am /etc/runit/3 file "
+echo date

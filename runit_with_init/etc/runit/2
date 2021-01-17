@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "i am /etc/runit/2 file "
+exec runsvdir -P /etc/service
+echo date
