@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "i am /etc/runit/1 file "
+echo date
+echo "1:i amg oing to stop  "

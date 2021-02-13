@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "i am first runit sample service"
+echo "hello there.i am from firstrunit service log" >&1
+echo date
+df -h
+sh ./testservice.sh

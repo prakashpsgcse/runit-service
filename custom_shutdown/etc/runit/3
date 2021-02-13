@@ -1,0 +1,5 @@
+#!/bin/sh
+exec 2>&1
+echo "i am /etc/runit/3 file "
+echo date
+echo "1:i amg going to stop: shutdown completed   "

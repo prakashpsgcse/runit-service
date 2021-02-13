@@ -176,3 +176,42 @@ These are working examples for Debian sarge
 http://smarden.org/runit/debian/3
 
 https://paulgorman.org/technical/runit.txt.html
+
+
+#RUNIT Signals
+-> If runsvdir receives a TERM signal, it exits with 0 immediately.
+-> If runsvdir receives a HUP signal, it sends a TERM signal to each runsv(8) process it is monitoring and then exits with 111
+-> When I run 
+```shell
+docker kill 40ed444ca8c2 --signal SIGCONT
+docker kill 40ed444ca8c2 --signal SIGTERM
+docker kill 40ed444ca8c2 --signal SIGKILL
+```
+  this will not run runlevel3
+
+-> we need stopit file in runit folder for executing /etc/runit/3 file 
+-> only SIGCONT is executing runlevel 3 [SIGKILL/SIGTERM/SIGHUP is not executing runlrvl 3]
+
+```shell
+[root@localhost runit-service]# docker logs -f 40ed444ca8c2
+- runit: $Id: 25da3b86f7bed4038b8a039d2f8e8c9bbcf0822b $: booting.
+- runit: enter stage: /etc/runit/1
+i am /etc/runit/1 file 
+date
+1:i amg oing to stop  
+- runit: leave stage: /etc/runit/1
+- runit: enter stage: /etc/runit/2
+i am /etc/runit/2 file 
+- runit: leave stage: /etc/runit/2
+- runit: enter stage: /etc/runit/3
+i am /etc/runit/3 file 
+date
+1:i amg going to stop: shutdown completed   
+- runit: leave stage: /etc/runit/3
+- runit: sending KILL signal to all processes...
+- runit: power off...
+- runit: system halt.
+```
+
+###TRAP with runit 
+
