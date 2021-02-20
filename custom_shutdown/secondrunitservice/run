@@ -1,0 +1,4 @@
+#!/bin/sh
+exec 2>&1
+echo "i am Second runit sample service. going to start Secondservice.sh "
+sh /opt/test/SecondService.sh

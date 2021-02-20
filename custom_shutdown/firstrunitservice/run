@@ -1,6 +1,8 @@
 #!/bin/sh
-echo "i am first runit sample service"
-echo "hello there.i am from firstrunit service log" >&1
-echo date
-df -h
-sh ./testservice.sh
+exec 2>&1
+
+trap "echo SIGHUP caught" SIGHUP
+trap "echo SIGTERM caught" SIGTERM SIGINT
+
+echo "i am FIRST runit sample service. going to start firstservice.sh "
+sh /opt/test/firstservice.sh

@@ -1,4 +1,7 @@
 #!/bin/sh
-echo "i am /etc/runit/1 file "
+
+echo "STAGE 1: starting ..............."
+
 echo date
-echo "1:i amg oing to stop  "
+
+echo "STAGE 1: stopping ..............."

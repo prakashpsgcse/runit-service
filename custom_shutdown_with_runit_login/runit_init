@@ -5,23 +5,16 @@ RUN apk add --no-cache curl \
     pstree
 
 RUN mkdir /opt/test
-COPY firstservice.sh /opt/test
-COPY SecondService.sh /opt/test
-RUN chmod +x /opt/test/firstservice.sh
-RUN chmod +x /opt/test/SecondService.sh
+COPY testservice.sh /opt/test
+RUN chmod +x /opt/test/testservice.sh
 COPY etc/runit /etc/runit
 RUN chmod -R 777 /etc/runit
 WORKDIR /etc/sv/firstrunitservice
 COPY firstrunitservice .
 RUN chmod +x run
-
-WORKDIR /etc/sv/secondrunitservice
-COPY secondrunitservice .
-RUN chmod +x run
+RUN chmod +x log/run
 
 RUN ln -s /etc/sv/firstrunitservice /etc/service/firstrunitservice
-RUN ln -s /etc/sv/secondrunitservice /etc/service/secondrunitservice
 
-STOPSIGNAL SIGCONT
 CMD ["/sbin/runit-init"]
 RUN echo "done building"

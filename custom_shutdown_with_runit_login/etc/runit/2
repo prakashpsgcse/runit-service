@@ -1,0 +1,16 @@
+#!/bin/sh
+echo "i am /etc/runit/2 file "
+
+echo "i am registering trap "
+
+sv_stop() {
+      echo "IN Stage 2: I received SIGCONT"
+}
+
+#trap UserSig1 SIGUSR1
+trap sv_stop SIGKILL SIGTERM SIGCONT
+
+exec runsvdir -P /etc/service &
+wait
+echo date
+echo "2:i am going to stop  "

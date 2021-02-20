@@ -1,5 +1,25 @@
 #!/bin/sh
 exec 2>&1
+echo "STAGE 3: starting ..............."
+
+cont_sv() {
+      echo "STAGE 3: I received SIGCONT"
+}
+
+term_sv() {
+      echo "STAGE 3: I received SIGTERM"
+}
+kill_sv() {
+      echo "STAGE 3: I received SIGKILL"
+}
+#trap UserSig1 SIGUSR1
+#trap kill_sv SIGKILL
+trap term_sv SIGTERM
+#trap cont_sv SIGCONT
+
 echo "i am /etc/runit/3 file "
-echo date
-echo "1:i amg going to stop: shutdown completed   "
+#echo "i will stop all the service now "
+#sv status firstrunitservice
+#sv stop firstrunitservice
+
+echo "STAGE 3: stopping ..............."

@@ -215,3 +215,115 @@ date
 
 ###TRAP with runit 
 
+-> SIGKILL & SIGSTOP cannot be TRAPPED 
+-> 
+
+#RUNIT Signals
+-> If runsvdir receives a TERM signal, it exits with 0 immediately.
+-> If runsvdir receives a HUP signal, it sends a TERM signal to each runsv(8) process it is monitoring and then exits with 111
+-> If  runsv receives a TERM signal, it acts as if the character x was written to the control
+pipe.
+
+Solution:
+1.when SIGTERM/SIGKILL/SIGHUP received from docker/kubernetes convert it to SIGHUP and send it to runsvdir
+2.Automatically When runsvdir receives a HUP signal, it sends a TERM signal to each runsv
+
+How do you make sure you will catch/trap these signals ?
+most of the time SIGTERM/SIGKILL/SIGHUP is received by runit-init (process ID 1 ) an
+
+
+Not able to TRAP SIGTERM from docker so We can use STOPSIGNAL 
+
+Solution for GraceFull Shutdown :
+
+In DockerFile use SIGCONT as stop signal 
+Add /etc/runit/stop. this will execute /etc/runit/3 
+In /etc/runit/3  file stop all services using sv stop
+
+What to use sv stop or sv down ?
+
+
+####up
+If the service is not running, start it. If the service stops, restart it.
+####down
+If the service is running, send it the TERM signal, and the CONT signal.
+If ./run exits, start ./finish if it exists
+After it stops, do not restart service.
+####once
+If the service is not running, start it. Do not restart it if it stop
+####start
+Same as up, but wait up to 7 seconds for the command to take effect.
+Then report the status or timeout. 
+If the script ./check exists in the service directory, sv runs this script to check whether the service is up and available; it’s considered to be available if ./check exits with 0.
+####stop
+Same as down, but wait up to 7 seconds for the service to become down. 
+Then report the status or timeout.
+####force-stop
+Same as down, but wait up to 7 seconds for the service to become down.
+Then report the status, and on timeout send the service the kill command.
+
+
+##Docker zombie reaping problem Issue: 
+When we kill or force stop service runsv process dies and actualprocess is not 
+In Init sys process without parent will be adopted by PID 1 
+
+ex 
+```shell
+/etc/sv/secondrunitservice # pstree
+-+= 00001 root runit 
+ |-+- 00015 root sh /opt/test/SecondService.sh 
+ | \--- 00108 root sleep 10 
+ |-+- 00014 root sh /opt/test/firstservice.sh 
+ | \--- 00109 root sleep 10 
+ \-+= 00009 root runsvdir /etc/service 
+   |--- 00011 root runsv firstrunitservice 
+   \--- 00010 root runsv secondrunitservice 
+/etc/sv/secondrunitservice # sv start firstrunitservice
+ok: run: firstrunitservice: (pid 118) 0s
+/etc/sv/secondrunitservice # pstree
+-+= 00001 root runit 
+ |-+- 00015 root sh /opt/test/SecondService.sh 
+ | \--- 00115 root sleep 10 
+ |-+- 00014 root sh /opt/test/firstservice.sh 
+ | \--- 00116 root sleep 10 
+ \-+= 00009 root runsvdir /etc/service 
+   |-+- 00011 root runsv firstrunitservice 
+   | \-+- 00118 root /bin/sh ./run 
+   |   \-+- 00119 root sh /opt/test/firstservice.sh 
+   |     \--- 00120 root sleep 10 
+   \--- 00010 root runsv secondrunitservice
+```
+
+#Unix Process Basics 
+-> for any command Unix/Linux creates/starts process 
+-> Can be foreground / Background
+-> Daemons are system-related background processes
+-> Tracked with PID [process id-5 digit]
+-> alone with PID parent PID [PPID]  also assigned from who created that 
+-> a parent process can create an independently executing child process
+-> each process has parent except PID 1 or Init process .bcoz started by kernal
+-> process can wait() for child prcesss to complete  
+-> The parent process may then issue a wait system call,
+which suspends the execution of the parent process while the child executes
+-> After child terminates with exit code , parent will resume [only for wait()]
+-> when child process terminated/killed SIGCHLD sent to parent
+-> Using this parent can retrive exit status of child
+-> Parent updates process table [removed entry -> reaped]
+-> process ends via exit, all of the memory and resources associated with it are deallocated
+->the process's entry in the process table remains .Its parent process responsibility to call wait() and get the exit code of child and remove Child entry from PTABLE
+-> ps comand OP with Z in STAT field is zombie process
+->
+##Zombie and Orphan Processes
+###Zombie Process
+-> if parent is not waiting on child [just to update status] is  
+    Zombie  Processes
+-> No one is there to remove its state from P-Table
+-> processes that stay zombies for a long time are generally an error and cause a resource leak
+###Orphan Processes
+-> parent is killed before child its called Orphan Processes 
+-> This process is not dead , it will be executing 
+-> Thease process will be Adapted by PID 1 (INIT PROCESS)
+-> Then INIT will wait() on this process and remove it from P-TABLE
+
+
+https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/
