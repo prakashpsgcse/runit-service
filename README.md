@@ -122,6 +122,25 @@ exec svlogd -t .
 
 ```
 -> **-t** timestamp [man svlogd]
+
+##Process Tree
+ -> Runit willbe PID 1 
+ -> Runit will start runsvdir in stage 2 
+ -> Runsvdir will create runsv process for each /etc/sv dir 
+
+```shell
+[root@localhost prakash]# docker exec -it c33965a698a2 pstree
+-+= 00001 root runit 
+ \-+= 00010 root runsvdir /etc/service 
+   |-+- 00012 root runsv firstrunitservice 
+   | \-+- 00014 root /bin/sh ./run 
+   |   \-+- 00015 root sh /opt/test/firstservice.sh 
+   |     \--- 00021 root sleep 10 
+   \-+- 00011 root runsv secondrunitservice 
+     \-+- 00013 root /bin/sh ./run 
+       \-+- 00016 root sh /opt/test/SecondService.sh 
+         \--- 00022 root sleep 10
+```
 ## Terminating runsvdir
 -> When you kill runsvdir only that process is killed   
 -> services will be active and running  

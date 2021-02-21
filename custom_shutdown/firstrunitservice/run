@@ -1,8 +1,7 @@
 #!/bin/sh
 exec 2>&1
 
-trap "echo SIGHUP caught" SIGHUP
-trap "echo SIGTERM caught" SIGTERM SIGINT
+trap "echo SIGTERM caught" SIGTERM
 
 echo "i am FIRST runit sample service. going to start firstservice.sh "
 sh /opt/test/firstservice.sh

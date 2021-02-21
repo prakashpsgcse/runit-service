@@ -14,7 +14,7 @@ term_sv() {
 kill_sv() {
       echo "STAGE 2: I received SIGUSR1"
 }
-trap kill_sv SIGUSR1
+#trap kill_sv SIGUSR1
 #trap kill_sv SIGKILL
 #trap term_sv SIGTERM
 #trap cont_sv SIGCONT
