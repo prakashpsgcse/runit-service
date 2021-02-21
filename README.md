@@ -1,4 +1,4 @@
-#Init System 
+# Init System 
 -> first prcess in booting process [after BIOS]  
 -> daemon process  
 -> continues running until the system is shut down  
@@ -7,7 +7,7 @@
 -> this should start all process/service/daemons  
 -> ex: boot screen , N/W process etc
 
-###Examples 
+### Examples 
 -> systemd  
 -> launchd  
 -> runit 
@@ -30,7 +30,7 @@ _**svlogd**_ is runit’s service logging daemon.
 _**chpst**_ runs a program with a changed process state (e.g. set the user id of a program, or renice a program)  
 _**utmpset**_ modifies the user accounting database utmp to indicate that the user on the terminal line logged out.  
 
-###Starting runsvdir
+### Starting runsvdir
 ```shell
 runsvdir -P /etc/service
 ```
@@ -39,7 +39,7 @@ runsvdir -P /etc/service
 ps -ef | grep runsvdir
 ```
 
-####Dir Structure
+#### Dir Structure
 -> core dir is **/etc/sv**  
 -> this contain one dir for each process and **run** script to start process
    ```shell
@@ -48,7 +48,7 @@ ps -ef | grep runsvdir
    /etc/sv/kafka
    /etc/sv/zookeeper
 ```
-###runsvdir
+### runsvdir
 -> starts runsv process for each subdir in /etc/service or link  
 -> restart runsv process if it terminates  
 -> every 5 sec it checks delta in dir and starts if new folder or sends TERM to runsv if folder is removed  
@@ -57,7 +57,7 @@ ps -ef | grep runsvdir
 -> If runsvdir receives a TERM signal, it exits with 0 immediately, unless -H is specified in which case TERM is treated like HUP.  
 -> If runsvdir receives a HUP signal, it sends a TERM signal to each runsv(8) process it is monitoring and then exits with 111.  
 
-#First runit Service
+# First runit Service
 -> create folder and run file 
 ```shell
 #!/bin/sh
@@ -94,7 +94,7 @@ prw-------. 1 root root  0 Jan 10 14:32 ok
 
 ```
 
-###Logs
+### Logs
 -> to check logs of each services/process  
 -> run log service inside each service/process  
 -> log file name  will be **current**  
@@ -122,7 +122,7 @@ exec svlogd -t .
 
 ```
 -> **-t** timestamp [man svlogd]
-##Terminating runsvdir
+## Terminating runsvdir
 -> When you kill runsvdir only that process is killed   
 -> services will be active and running  
 -> when you kill service log service associated to that is not killed  
@@ -133,19 +133,19 @@ kill -1 {runsvdir pid}
 -> this will kill all runsv process including log service  
 -> seperate svlogd for service  
 -> we can directly send SIGNALS to runsv  
-##Terminating service/runsv
+## Terminating service/runsv
 ```shell
 sv {signal} {service-name}
 --------------------------------------
 ```
-#RUNIT Stages
+# RUNIT Stages
 -> runit performs the system's booting, running and shutting down in 3 stages
-###Stage 1
+### Stage 1
 -> this executed when sys starts
 -> runs /etc/runit/1 file 
 -> sys init tasks/one time tasks are done 
 
-###Stage 2
+### Stage 2
 -> starts after stage 1  
 -> runs /etc/runit/2  
 -> start runsvdir here  
@@ -167,12 +167,12 @@ sv -w196 force-stop /etc/service/*
 sv exit /etc/service/*
 ```
 
-##sample stages 
+## sample stages 
 These are working examples for Debian sarge  
 http://smarden.org/runit/debian/3
 
 
-#RUNIT Signals
+# RUNIT Signals
 -> If runsvdir receives a TERM signal, it exits with 0 immediately.  
 -> If runsvdir receives a HUP signal, it sends a TERM signal to each runsv process it is monitoring and then exits with 111  
 -> When I run 
@@ -207,13 +207,13 @@ date
 - runit: system halt.
 ```
 
-###TRAP
+###T RAP
 -> SIGKILL & SIGSTOP cannot be TRAPPED  
 -> Docker stop command will send SIGTERM  
 -> Docker kill command will send SIGKILL  
 
 ## Runit gracefull shutdown
-###Method 1:
+### Method 1:
 1. When SIGTERM/SIGKILL/SIGHUP received from docker/kubernetes convert it to SIGHUP and send it to runsvdir  
 2. Automatically When runsvdir receives a HUP signal, it sends a TERM signal to each runsv  
 
@@ -221,34 +221,34 @@ date
 -> most of the time SIGTERM/SIGHUP is received by runit-init (process ID 1 )  
 
 Not able to TRAP SIGTERM from docker????
-###Method 2
+### Method 2
 1. In DockerFile use SIGCONT as stop signal   
 2. Add /etc/runit/stop. this will execute /etc/runit/3  
 3. In /etc/runit/3  file stop all services using sv stop  
 
 
-##SV commands 
-####up
+## SV commands 
+### up
 If the service is not running, start it. If the service stops, restart it.
-####down
+### down
 If the service is running, send it the TERM signal, and the CONT signal.  
 If ./run exits, start ./finish if it exists  
 After it stops, do not restart service.  
-####once
+## once
 If the service is not running, start it. Do not restart it if it stop
-####start
+## start
 Same as up, but wait up to 7 seconds for the command to take effect.  
 Then report the status or timeout.  
 If the script ./check exists in the service directory, sv runs this script to check whether the service is up and available; it’s considered to be available if ./check exits with 0.  
-####stop
+## stop
 Same as down, but wait up to 7 seconds for the service to become down.  
 Then report the status or timeout.  
-####force-stop
+## force-stop
 Same as down, but wait up to 7 seconds for the service to become down.  
 Then report the status, and on timeout send the service the kill command.  
 
 
-##Docker zombie reaping problem Issue: 
+## Docker zombie reaping problem Issue: 
  -> When we kill or force stop service runsv process dies and actual process is not  
  -> In Init sys process without parent will be adopted by PID 1 
 
@@ -283,7 +283,7 @@ ok: run: firstrunitservice: (pid 118) 0s
    \--- 00010 root runsv secondrunitservice
 ```
 
-#Unix Process Basics 
+# Unix Process Basics 
 -> for any command Unix/Linux creates/starts process   
 -> Can be foreground / Background  
 -> Daemons are system-related background processes  
@@ -301,15 +301,15 @@ ok: run: firstrunitservice: (pid 118) 0s
 -> the process's entry in the process table remains .Its parent process responsibility to call wait() and get the exit code of child and remove Child entry from PTABLE  
 -> ps cmd OP with Z in STAT field is zombie process  
 
-##Zombie and Orphan Processes
+## Zombie and Orphan Processes
 
-###Zombie Process
+### Zombie Process
 -> if parent is not waiting on child [just to update status] is Zombie  Processes   
 -> if a wait is not performed then the terminated child remains in a "zombie" state  
 -> No one is there to remove its state from P-Table  
 -> processes that stay zombies for a long time are generally an error and cause a resource leak  
 -> As long as a zombie is not removed from the system via a wait, it will consume a slot in the kernel process table, and if this table fills, it will not be possible to create further processes.  
-###Orphan Processes
+### Orphan Processes
 -> parent is killed before child its called Orphan Processes  
 -> This process is not dead , it will be executing  
 -> Thease process will be Adapted by PID 1 (INIT PROCESS)  
